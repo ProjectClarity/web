@@ -25,7 +25,6 @@ def login_signup_callback_view():
   user_info = User.fetch_info(credentials)
   u = User(user_info['email'])
   if not u.check():
-    u.create(credentials=credentials_object['token_response'], **user_info)
+    u.create(credentials=credentials_object, **user_info)
   login_user(u, remember=True)
   return redirect(url_for('index_view'))
-

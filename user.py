@@ -55,8 +55,8 @@ class User():
   def get_credentials(self):
     return OAuth2Credentials.from_json(self.get('credentials'))
 
-  def build(self, service):
-    return helpers_build(service, self.get_credentials())
+  def build(self, service, **kwargs):
+    return helpers_build(service, self.get_credentials(), **kwargs)
 
   @staticmethod
   def fetch_info(credentials):
