@@ -1,15 +1,20 @@
+from helpers import build as helpers_build
 from remote import users
+from oauth2client.client import OAuth2Credentials
 import random
 
 class User():
-  def __init__(self, access_token):
-    self.user = users.find_one({'access_token': access_token})
+  def __init__(self, email):
+    self.user = users.find_one({'email': email})
 
   def get(self, key):
     return self.user.get(key, '')
 
   def set(self, key, value):
-    users.update({'_id': self.user['_id']}, {'$set': {key: value}})
+    self.update({key: value})
+
+  def update(self, d):
+    users.update({'_id': self.user['_id']}, {'$set': d})
     self.user = users.find_one({'_id': self.get('_id')})
 
   def check(self):
@@ -26,7 +31,7 @@ class User():
     return self.check()
 
   def get_id(self):
-    return str(self.user['_id'])
+    return self.get('email')
 
   def is_anonymous(self):
     return False
@@ -46,3 +51,15 @@ class User():
           token = None
       self.update({'token': token})
     return token
+
+  def get_credentials(self):
+    return OAuth2Credentials.from_json(self.get('credentials'))
+
+  def build(self, service):
+    return helpers_build(service, self.get_credentials())
+
+  @staticmethod
+  def fetch_info(credentials):
+    user_info_provider = helpers_build('oauth2', credentials)
+    user_info = user_info_provider.userinfo().get().execute()
+    return user_info

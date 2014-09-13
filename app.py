@@ -1,4 +1,5 @@
 from imports import *
+from user import User
 
 dev = os.environ.get('dev') == 'true' or not os.environ.get('PORT')
 
@@ -10,8 +11,8 @@ login_manager.init_app(app)
 login_manager.login_view = "login_signup_view"
 
 @login_manager.user_loader
-def load_user(access_token):
-  u = User(access_token)
+def load_user(email):
+  u = User(email)
   return u if u.check() else None
 
 from routes import *

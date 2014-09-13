@@ -6,7 +6,7 @@ from helpers import get_flow
 @app.route('/')
 @login_required
 def index_view():
-  return render('index.html')
+  return render_template('index.html')
 
 @app.route('/auth/go')
 def login_signup_view():
@@ -20,10 +20,12 @@ def login_signup_callback_view():
   code = request.args.get('code')
   if not code:
     return error or 'error'
-  credentials = get_flow().step2_exchange(code).to_json()
-  u = User(credentials['access_token'])
+  credentials = get_flow().step2_exchange(code)
+  credentials_object = json.loads(credentials.to_json())
+  user_info = User.fetch_info(credentials)
+  u = User(user_info['email'])
   if not u.check():
-    u.create(credentials)
+    u.create(credentials=credentials_object['token_response'], **user_info)
   login_user(u, remember=True)
   return redirect(url_for('index_view'))
 
