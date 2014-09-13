@@ -28,3 +28,15 @@ def login_signup_callback_view():
     u.create(credentials=credentials_object, **user_info)
   login_user(u, remember=True)
   return redirect(url_for('index_view'))
+
+@app.route('/user/<int:pin>/calendar/events/<int:n>')
+def user_calendar_view(pin, n):
+  user = User.from_token(pin)
+  if not user:
+    return jsonify({'error': True, 'message': 'User not found'})
+  events, page_token, sync_token = user.get_calendar_events(n)
+  return jsonify({'events': events, 'page_token': page_token, 'sync_token': sync_token})
+
+@app.route('/events/create', methods=['POST'])
+def events_create_view():
+  pass

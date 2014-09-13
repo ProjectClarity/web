@@ -1,11 +1,18 @@
 from helpers import build as helpers_build
 from remote import users
 from oauth2client.client import OAuth2Credentials
-import random
+import random, json, datetime
 
 class User():
   def __init__(self, email):
     self.user = users.find_one({'email': email})
+
+  @staticmethod
+  def from_token(token):
+    u = users.find_one({'token': token})
+    if not u:
+      return None
+    return User(u.get('email'))
 
   def get(self, key):
     return self.user.get(key, '')
@@ -53,10 +60,16 @@ class User():
     return token
 
   def get_credentials(self):
-    return OAuth2Credentials.from_json(self.get('credentials'))
+    return OAuth2Credentials.from_json(json.dumps(self.get('credentials')))
 
   def build(self, service, **kwargs):
     return helpers_build(service, self.get_credentials(), **kwargs)
+
+  def get_calendar_events(self, n, page_token=None, sync_token=None):
+    calendar_service = self.build('calendar', v='v3')
+    now = datetime.datetime.utcnow().isoformat("T") + "Z"
+    events = calendar_service.events().list(calendarId='primary', maxResults=n, pageToken=page_token, syncToken=sync_token, singleEvents=True, timeMin=now).execute()
+    return events['items'], events.get('nextPageToken'), events.get('nextSyncToken')
 
   @staticmethod
   def fetch_info(credentials):
