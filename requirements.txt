@@ -1,0 +1,15 @@
+Flask==0.10.1
+Flask-Login==0.2.11
+Jinja2==2.7.3
+MarkupSafe==0.23
+Werkzeug==0.9.6
+boto==2.32.1
+cffi==0.8.6
+google-api-python-client==1.2
+gunicorn==19.1.1
+httplib2==0.9
+itsdangerous==0.24
+oauth2client==1.2
+pycparser==2.10
+pymongo==2.7.2
+wsgiref==0.1.2
