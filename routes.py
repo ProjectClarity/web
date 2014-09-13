@@ -1,7 +1,8 @@
 from app import app
 from imports import *
 from user import User
-from helpers import get_flow
+from helpers import get_flow, humanize
+from remote import processed_data
 
 @app.route('/')
 @login_required
@@ -34,9 +35,38 @@ def user_calendar_view(pin, n):
   user = User.from_token(pin)
   if not user:
     return jsonify({'error': True, 'message': 'User not found'})
-  events, page_token, sync_token = user.get_calendar_events(n)
+  events, page_token, sync_token = user.get_calendar_events(n, page_token=request.args.get('page_token'), sync_token=request.args.get('sync_token'))
   return jsonify({'events': events, 'page_token': page_token, 'sync_token': sync_token})
 
 @app.route('/events/create', methods=['POST'])
 def events_create_view():
-  pass
+  event_ids = request.json['event_ids']
+  field_excludes = ['_id', 'email_id', 'title', 'user_id', 'datetime', 'end', 'location', 'url', 'source']
+  for event_id in event_ids:
+    event_obj = processed_data.find_one({'_id': ObjectId(event_id)})
+    event_obj_filtered = {k:v for k,v in event_obj.iteritems() if k not in field_excludes}
+    description = "\n".join(["{}: {}".format(humanize(k), v) for k,v in event_obj_filtered.iteritems()])
+    event = {
+      'summary': event_obj['title'],
+      'start': {
+        'dateTime': event_obj['datetime'][0].isoformat("T") + "Z"
+      },
+      'end': {
+        'dateTime': event_obj.get('end', event_obj['datetime'][0] + datetime.timedelta(hours=1)).isoformat("T") + "Z"
+      },
+      'description': description,
+      'extendedProperties': {
+        'shared': event_obj_filtered
+      }
+    }
+    if event.get('location'):
+      event['location'] =  event_obj.get('location')
+    if event.get('source') or event_obj.get('url'):
+      event['source'] = {}
+      if event.get('source'):
+        event['source']['title'] = event_obj.get('source')
+      if event.get('url'):
+        event['source']['url'] = event_obj.get('url')
+    user = User.from_id(event_obj['user_id'])
+    _id = user.insert_calendar_event(event)
+    return jsonify({'status': 'ok', 'id': _id, 'event': event})

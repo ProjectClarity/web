@@ -14,6 +14,13 @@ class User():
       return None
     return User(u.get('email'))
 
+  @staticmethod
+  def from_id(_id):
+    u = users.find_one({'_id': _id})
+    if not u:
+      return None
+    return User(u.get('email'))
+
   def get(self, key):
     return self.user.get(key, '')
 
@@ -70,6 +77,10 @@ class User():
     now = datetime.datetime.utcnow().isoformat("T") + "Z"
     events = calendar_service.events().list(calendarId='primary', maxResults=n, pageToken=page_token, syncToken=sync_token, singleEvents=True, timeMin=now).execute()
     return events['items'], events.get('nextPageToken'), events.get('nextSyncToken')
+
+  def insert_calendar_event(self, event):
+    calendar_service = self.build('calendar', v='v3')
+    return calendar_service.events().insert(calendarId='primary', body=event).execute()['id']
 
   @staticmethod
   def fetch_info(credentials):
