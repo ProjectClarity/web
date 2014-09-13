@@ -72,6 +72,14 @@ class User():
   def build(self, service, **kwargs):
     return helpers_build(service, self.get_credentials(), **kwargs)
 
+  def get_timezone(self):
+    timezone = self.get('timezone')
+    if not timezone:
+      calendar_service = self.build('calendar', v='v3')
+      default_calendar = calendar_service.calendars().get(calendarId='primary').execute()
+      self.set('timezone', default_calendar['timeZone'])
+    return timezone
+
   def get_calendar_events(self, n, page_token=None, sync_token=None):
     calendar_service = self.build('calendar', v='v3')
     now = datetime.datetime.utcnow().isoformat("T") + "Z"

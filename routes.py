@@ -44,15 +44,18 @@ def events_create_view():
   field_excludes = ['_id', 'email_id', 'title', 'user_id', 'datetime', 'end', 'location', 'url', 'source']
   for event_id in event_ids:
     event_obj = processed_data.find_one({'_id': ObjectId(event_id)})
+    user = User.from_id(event_obj['user_id'])
     event_obj_filtered = {k:v for k,v in event_obj.iteritems() if k not in field_excludes}
     description = "\n".join(["{}: {}".format(humanize(k), v) for k,v in event_obj_filtered.iteritems()])
     event = {
       'summary': event_obj['title'],
       'start': {
-        'dateTime': event_obj['datetime'][0].isoformat("T") + "Z"
+        'dateTime': event_obj['datetime'][0].isoformat("T"),
+        'timeZone': user.get_timezone()
       },
       'end': {
-        'dateTime': event_obj.get('end', event_obj['datetime'][0] + datetime.timedelta(hours=1)).isoformat("T") + "Z"
+        'dateTime': event_obj.get('end', event_obj['datetime'][0] + datetime.timedelta(hours=1)).isoformat("T"),
+        'timeZone': user.get_timezone()
       },
       'description': description,
       'extendedProperties': {
@@ -67,7 +70,6 @@ def events_create_view():
         event['source']['title'] = event_obj.get('source')
       if event.get('url'):
         event['source']['url'] = event_obj.get('url')
-    user = User.from_id(event_obj['user_id'])
     _id = user.insert_calendar_event(event)
     # processed_data.remove({'_id': event_obj['_id']})
     return jsonify({'status': 'ok', 'id': _id, 'event': event})
