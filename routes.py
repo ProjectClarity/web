@@ -75,10 +75,8 @@ def events_create_view():
       event['location'] = event_obj.get('location')
     if event_obj.get('source') or event_obj.get('url'):
       event['source'] = {}
-      if event_obj.get('source'):
-        event['source']['title'] = event_obj.get('source')
-      if event_obj.get('url'):
-        event['source']['url'] = event_obj.get('url')
+      event['source']['title'] = event_obj.get('source', event_obj['title'])
+      event['source']['url'] = event_obj.get('url', url_for('index_view', _external=True))
     processed_event_ids.append(user.insert_calendar_event(event))
     events.append(event)
     # processed_data.remove({'_id': event_obj['_id']})
