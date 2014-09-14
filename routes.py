@@ -85,37 +85,41 @@ def events_create_view():
 
 @app.route('/user/distance')
 def user_distance_view():
-  API_ROOT = 'https://maps.googleapis.com/maps/api/distancematrix/json'
+  GOOGLE_API_ROOT = 'https://maps.googleapis.com/maps/api/distancematrix/json'
+  UBER_API_ROOT = 'https://api.uber.com/v1'
+
   origin = request.args.get('current_location')
+  distances = {}
+  destinations = request.args.get('destinations').split('|')
+  for destination in destinations:
+    distances[destination] = {}
+    headers = {'Authorization': 'Token ' + os.getenv('UBER_API_KEY')}
+    query = {
+      'start_latitude': origin.split(',')[0],
+      'start_longitude': origin.split(',')[1],
+      'end_latitude': destination.split(',')[0],
+      'end_longitude': destination.split(',')[1],
+    }
+    price_resp = requests.get(UBER_API_ROOT + '/estimates/price', params=query, headers=headers).json()
+    for price in price_resp.get('prices',[]):
+      if price['display_name'] == 'uberX':
+        distances[destination]['uber_price'] = price['estimate']
+        break
+    time_resp = requests.get(UBER_API_ROOT + '/estimates/time', params=query, headers=headers).json()
+    for time in time_resp.get('times',[]):
+      if time['display_name'] == 'uberX':
+        distances[destination]['uber_time'] = time['estimate']
+        break
+
   parameters = {
     'origins': request.args.get('current_location'),
     'destinations': request.args.get('destinations'),
     'key': os.getenv('GOOGLE_API_KEY')
   }
-  distances = {}
-  destinations = request.args.get('destinations').split('|')
   for mode in ['driving', 'biking', 'walking']:
     parameters.update({'mode': mode})
-    resp = requests.get(API_ROOT, params=parameters).json()
+    resp = requests.get(GOOGLE_API_ROOT, params=parameters).json()
     for i,destination in enumerate(resp['rows'][0]['elements']):
-      distances[destinations[i]] = {}
       distances[destinations[i]][mode] = destination['duration']['text']
-      headers = {'Authorization': 'Token ' + os.getenv('UBER_API_KEY')}
-      query = {
-        'start_latitude': origin.split(',')[0],
-        'start_longitude': origin.split(',')[1],
-        'end_latitude': destinations[i].split(',')[0],
-        'end_longitude': destinations[i].split(',')[1],
-      }
-      price_resp = requests.get('https://api.uber.com/v1/estimates/price', params=query, headers=headers).json()
-      for price in price_resp.get('prices',[]):
-        if price['display_name'] == 'uberX':
-          distances[destinations[i]]['uber_price'] = price['estimate']
-          break
-      time_resp = requests.get('https://api.uber.com/v1/estimates/time', params=query, headers=headers).json()
-      for time in time_resp.get('times',[]):
-        if time['display_name'] == 'uberX':
-          distances[destinations[i]]['uber_time'] = time['estimate']
-          break
   return jsonify(distances)
 
