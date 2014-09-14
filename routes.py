@@ -95,7 +95,7 @@ def events_create_view():
       event['source']['title'] = event_obj.get('source', event_obj['title'])
       event['source']['url'] = event_obj.get('url', url_for('index_view', _external=True))
     event_id = user.insert_calendar_event(event)
-    user.tag_message(message['id'], [os.getenv('TAG_NAME')])
+    user.tag_message(event_obj['email_id'], [os.getenv('TAG_NAME')])
     processed_event_ids.append(event_id)
     events.append(event)
     processed_data.update({'_id': event_obj['_id']}, {'$set': {'event_id': event_id}})
