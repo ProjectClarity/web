@@ -49,6 +49,8 @@ def user_calendar_events_view(pin, n):
 def events_create_view():
   event_ids = request.json['event_ids']
   field_excludes = ['_id', 'email_id', 'title', 'user_id', 'datetime', 'end', 'location', 'url', 'source']
+  processed_event_ids = []
+  events = []
   for event_id in event_ids:
     event_obj = processed_data.find_one({'_id': ObjectId(event_id)})
     user = User.from_id(event_obj['user_id'])
@@ -77,6 +79,7 @@ def events_create_view():
         event['source']['title'] = event_obj.get('source')
       if event.get('url'):
         event['source']['url'] = event_obj.get('url')
-    _id = user.insert_calendar_event(event)
+    processed_event_ids.append(user.insert_calendar_event(event))
+    events.append(event)
     processed_data.remove({'_id': event_obj['_id']})
-    return jsonify({'status': 'ok', 'id': _id, 'event': event})
+  return jsonify({'status': 'ok', 'ids': processed_event_ids, 'events': events})
