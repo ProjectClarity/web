@@ -122,6 +122,9 @@ def user_distance_view():
     parameters.update({'mode': mode})
     resp = requests.get(GOOGLE_API_ROOT, params=parameters).json()
     for i,destination in enumerate(resp['rows'][0]['elements']):
-      distances[destinations[i]][mode] = destination['duration']['text']
+      try:
+        distances[destinations[i]][mode] = destination['duration']['text']
+      except:
+        distances[destinations[i]][mode] = "N/A"
   return jsonify(distances)
 
