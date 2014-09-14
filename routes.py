@@ -64,7 +64,7 @@ def events_create_view():
         'timeZone': user.get_timezone()
       },
       'end': {
-        'dateTime': (event_obj.get('end',[])[0] or event_obj['datetime'][0] + datetime.timedelta(hours=1)).isoformat("T"),
+        'dateTime': (event_obj.get('end',[None])[0] or event_obj['datetime'][0] + datetime.timedelta(hours=1)).isoformat("T"),
         'timeZone': user.get_timezone()
       },
       'description': description,
