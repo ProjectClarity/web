@@ -8,7 +8,7 @@ import requests
 @app.route('/')
 @login_required
 def index_view():
-  events = processed_data.find({'user_id': current_user.get('_id')})
+  events = processed_data.find({'user_id': current_user.get('_id')}).limit(5)
   events = [{k:str(v) if k.endswith('_id') else v for k,v in event.iteritems()} for event in events]
   return render_template('index.html', events=events)
 

@@ -12,6 +12,13 @@
         Your mobile authentication token is <span class='text-info'>{{ current_user.token() }}</span>.
       </p>
       <p class='text-right'>
+        {% raw %}
+          <a ng-href="{{events[current].eventbrite_url}}" ng-show='events[current].eventbrite_url' target="_blank">
+            <button class='btn btn-info'>
+              Purchase Tickets
+            </button>
+          </a>
+        {% endraw %}
         <button class='btn btn-default' style='margin-right: -4%;' ng-click="destroy(current)">
           Delete Event
         </button>
