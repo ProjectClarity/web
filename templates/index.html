@@ -12,7 +12,7 @@
         Your mobile authentication token is <span class='text-info'>{{ current_user.token() }}</span>.
       </p>
       <p class='text-right'>
-        <button class='btn btn-default' style='margin-right: -4%;'>
+        <button class='btn btn-default' style='margin-right: -4%;' ng-click="destroy(current)">
           Delete Event
         </button>
       </p>
@@ -47,5 +47,6 @@
 {% block json %}
 
   window.events = {{ events|tojson }};
+  window.destroyURL = '{{ url_for('event_destroy_view', pin=current_user.token(), event_id='EVENT_ID') }}';
 
 {% endblock %}

@@ -63,7 +63,7 @@ def event_destroy_view(pin, event_id):
 @app.route('/events/create', methods=['POST'])
 def events_create_view():
   event_ids = request.json['event_ids']
-  field_excludes = ['_id', 'email_id', 'title', 'user_id', 'datetime', 'end', 'location', 'url', 'source', 'latitude', 'longitude']
+  field_excludes = ['_id', 'email_id', 'title', 'user_id', 'datetime', 'end', 'location', 'url', 'source', 'latitude', 'longitude', 'original_body']
   processed_event_ids = []
   events = []
   for event_id in event_ids:
@@ -71,6 +71,8 @@ def events_create_view():
     user = User.from_id(event_obj['user_id'])
     event_obj_filtered = {k:v for k,v in event_obj.iteritems() if k not in field_excludes}
     description = "\n".join(["{}: {}".format(humanize(k), v) for k,v in event_obj_filtered.iteritems()])
+    if event_obj.get('original_body'):
+      description += "\n\nOriginal Email:\n" + event_obj.get('original_body')
     event = {
       'summary': event_obj['title'],
       'start': {
