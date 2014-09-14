@@ -121,6 +121,8 @@ def user_distance_view():
   for mode in ['driving', 'biking', 'walking']:
     parameters.update({'mode': mode})
     resp = requests.get(GOOGLE_API_ROOT, params=parameters).json()
+    if len(resp['rows']) == 0:
+      return jsonify({'error': True, 'message': 'Request timed out'})
     for i,destination in enumerate(resp['rows'][0]['elements']):
       try:
         distances[destinations[i]][mode] = destination['duration']['text']
