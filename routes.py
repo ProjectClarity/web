@@ -64,7 +64,7 @@ def events_create_view():
         'timeZone': user.get_timezone()
       },
       'end': {
-        'dateTime': event_obj.get('end', event_obj['datetime'][0] + datetime.timedelta(hours=1)).isoformat("T"),
+        'dateTime': (event_obj.get('end',[])[0] or event_obj['datetime'][0] + datetime.timedelta(hours=1)).isoformat("T"),
         'timeZone': user.get_timezone()
       },
       'description': description,
@@ -86,6 +86,7 @@ def events_create_view():
 @app.route('/user/distance')
 def user_distance_view():
   API_ROOT = 'https://maps.googleapis.com/maps/api/distancematrix/json'
+  origin = request.args.get('current_location')
   parameters = {
     'origins': request.args.get('current_location'),
     'destinations': request.args.get('destinations'),
@@ -99,5 +100,22 @@ def user_distance_view():
     for i,destination in enumerate(resp['rows'][0]['elements']):
       distances[destinations[i]] = {}
       distances[destinations[i]][mode] = destination['duration']['text']
+      headers = {'Authorization': 'Token ' + os.getenv('UBER_API_KEY')}
+      query = {
+        'start_latitude': origin.split(',')[0],
+        'start_longitude': origin.split(',')[1],
+        'end_latitude': destinations[i].split(',')[0],
+        'end_longitude': destinations[i].split(',')[1],
+      }
+      price_resp = requests.get('https://api.uber.com/v1/estimates/price', params=query, headers=headers).json()
+      for price in price_resp.get('prices',[]):
+        if price['display_name'] == 'uberX':
+          distances[destinations[i]]['uber_price'] = price['estimate']
+          break
+      time_resp = requests.get('https://api.uber.com/v1/estimates/time', params=query, headers=headers).json()
+      for time in time_resp.get('times',[]):
+        if time['display_name'] == 'uberX':
+          distances[destinations[i]]['uber_time'] = time['estimate']
+          break
   return jsonify(distances)
 
