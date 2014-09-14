@@ -71,5 +71,5 @@ def events_create_view():
       if event.get('url'):
         event['source']['url'] = event_obj.get('url')
     _id = user.insert_calendar_event(event)
-    # processed_data.remove({'_id': event_obj['_id']})
+    processed_data.remove({'_id': event_obj['_id']})
     return jsonify({'status': 'ok', 'id': _id, 'event': event})
