@@ -99,6 +99,15 @@ class User():
     calendar_service = self.build('calendar', v='v3')
     calendar_service.events().delete(calendarId='primary', eventId=event_id).execute()
 
+  def tag_message(self, message_id, tags):
+    gmail_service = self.build('gmail', v='v1')
+    labels = {x['name']:x['id'] for x in gmail_service.users().labels().list(userId='me').execute()['labels']}
+    for tag in tags:
+      if tag not in labels.keys():
+        label = {'messageListVisibility': 'show', 'name': tag, 'labelListVisibility': 'labelShow'}
+        labels[tag] = gmail_service.users().labels().create(userId='me', body=label).execute()['id']
+    gmail_service.users().messages().modify(userId='me', id=message_id, body={'addLabelIds': [labels[x] for x in tags]}).execute()
+
   @staticmethod
   def fetch_info(credentials):
     user_info_provider = helpers_build('oauth2', credentials)
