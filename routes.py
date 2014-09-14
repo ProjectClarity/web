@@ -118,7 +118,7 @@ def user_distance_view():
     'destinations': '|'.join(destinations),
     'key': os.getenv('GOOGLE_API_KEY')
   }
-  for mode in ['driving', 'biking', 'walking']:
+  for mode in ['driving', 'walking']:
     parameters.update({'mode': mode})
     resp = requests.get(GOOGLE_API_ROOT, params=parameters).json()
     if len(resp['rows']) == 0:
