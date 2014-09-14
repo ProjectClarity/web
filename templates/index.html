@@ -37,6 +37,12 @@
           <p class="list-group-item-text">
             {{event.location}}
           </p>
+          <p class="list-group-item-text" ng-if='event.driving'>
+            {{event.driving}} by car
+          </p>
+          <p class="list-group-item-text" ng-if='event.uber_price'>
+            {{event.uber_price}} Uber ride ({{(event.uber_time/60)|number:0}} minutes away)
+          </p>
         </a>
       </div>
     </div>
@@ -55,5 +61,6 @@
 
   window.events = {{ events|tojson }};
   window.destroyURL = '{{ url_for('event_destroy_view', pin=current_user.token(), event_id='EVENT_ID') }}';
+  window.distanceURL = '{{url_for('user_distance_view') }}';
 
 {% endblock %}

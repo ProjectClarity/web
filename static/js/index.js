@@ -2,6 +2,31 @@ var indexCtrl = PennAppsXMIT.controller('indexCtrl', ['$window', '$scope', '$sce
   function($window, $scope, $sce, $timeout) {
     $scope.events = $window.events;
     $scope.current = 0;
+
+    loadDistances = function(position) {
+      _.each($scope.events, function(event, i, arr) {
+        geocoder = new google.maps.Geocoder();
+        geocoder.geocode({'address': event.location}, function(res, stat) {
+          if (stat == google.maps.GeocoderStatus.OK) {
+            var location = res[0].geometry.location;
+            var destination = location.lat() + ',' + location.lng();
+            var params = {
+              current_location: position.coords.latitude + ',' + position.coords.longitude,
+              destinations: destination
+            }
+            $.get($window.distanceURL, params)
+            .then(function(data) {
+              $timeout(function() {
+                _.extend(arr[i], data[destination]);
+              });
+            });
+          }
+        });
+      });
+    };
+
+    navigator.geolocation.getCurrentPosition(loadDistances);
+
     $scope.formatTime = function(dt) {
       return moment(dt).format('llll');
     };
