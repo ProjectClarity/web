@@ -95,6 +95,10 @@ class User():
     calendar_service = self.build('calendar', v='v3')
     return calendar_service.events().insert(calendarId='primary', body=event).execute()['id']
 
+  def destroy_calendar_event(self, event_id, calendar_id='primary'):
+    calendar_service = self.build('calendar', v='v3')
+    calendar_service.events().delete(calendarId='primary', eventId=event_id).execute()
+
   @staticmethod
   def fetch_info(credentials):
     user_info_provider = helpers_build('oauth2', credentials)

@@ -46,6 +46,15 @@ def user_calendar_events_view(pin, n):
   events, page_token, sync_token = user.get_calendar_events(n, calendar_id=request.args.get('calendar_id', 'primary'), page_token=request.args.get('page_token'), sync_token=request.args.get('sync_token'))
   return jsonify({'events': events, 'page_token': page_token, 'sync_token': sync_token})
 
+@app.route('/user/<int:pin>/calendar/events/<event_id>/destroy', methods=['POST'])
+def event_destroy_view(pin, event_id):
+  def user_calendars_view(pin):
+    user = User.from_token(pin)
+    if not user:
+      return jsonify({'error': True, 'message': 'User not found'})
+    user.destroy_calendar_event(event_id, calendar_id=request.args.get('calendar_id', 'primary'))
+    return jsonify({'status': 'ok'})
+
 @app.route('/events/create', methods=['POST'])
 def events_create_view():
   event_ids = request.json['event_ids']
