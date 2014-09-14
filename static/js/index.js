@@ -6,9 +6,7 @@ var indexCtrl = PennAppsXMIT.controller('indexCtrl', ['$window', '$scope', '$sce
       return moment(dt).format('llll');
     };
     $scope.toggle = function(i) {
-      if($scope.events[i].location) {
-        $scope.current = i;
-      }
+      $scope.current = i;
     };
     $scope.mapSrc = function() {
       var location = encodeURIComponent($scope.events[$scope.current].location);

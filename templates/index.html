@@ -9,7 +9,12 @@
     <div class="starter-template">
       <h1>PennAppsXMIT</h1>
       <p class="lead">
-        Your mobile authentication token is {{ current_user.token() }}.
+        Your mobile authentication token is <span class='text-info'>{{ current_user.token() }}</span>.
+      </p>
+      <p class='text-right'>
+        <button class='btn btn-default' style='margin-right: -4%;'>
+          Delete Event
+        </button>
       </p>
     </div>
 
@@ -17,7 +22,7 @@
     {% raw %}
     <div class='col-md-4'>
       <div class="list-group" ng-repeat='event in events'>
-        <a href="#" ng-click="toggle($index)" class="list-group-item active">
+        <a href="#" ng-click="toggle($index)" class="list-group-item" ng-class="{'active': current == $index}">
           <h4 class="list-group-item-heading">{{event.title}}</h4>
           <p class="list-group-item-text">
             {{formatTime(event.datetime[0])}}
@@ -30,8 +35,9 @@
     </div>
 
     <div class='col-md-8'>
-      <iframe width="800" height="500" frameborder="0" style="border:0" ng-src="{{mapSrc()}}">
+      <iframe width="800" height="500" frameborder="0" style="border:0" ng-src="{{mapSrc()}}" ng-show='events[current].location'>
       </iframe>
+      <img ng-hide='events[current].location' src='http://upload.wikimedia.org/wikipedia/commons/9/9a/No_map.png' style='width: 800px;'>
     </div>
      {% endraw %}
   </div>
