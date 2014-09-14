@@ -30,12 +30,19 @@ def login_signup_callback_view():
   login_user(u, remember=True)
   return redirect(url_for('index_view'))
 
-@app.route('/user/<int:pin>/calendar/events/<int:n>')
-def user_calendar_view(pin, n):
+@app.route('/user/<int:pin>/calendars')
+def user_calendars_view(pin):
   user = User.from_token(pin)
   if not user:
     return jsonify({'error': True, 'message': 'User not found'})
-  events, page_token, sync_token = user.get_calendar_events(n, page_token=request.args.get('page_token'), sync_token=request.args.get('sync_token'))
+  return jsonify({'calendars': user.get_calendars()})
+
+@app.route('/user/<int:pin>/calendar/events/<int:n>')
+def user_calendar_events_view(pin, n):
+  user = User.from_token(pin)
+  if not user:
+    return jsonify({'error': True, 'message': 'User not found'})
+  events, page_token, sync_token = user.get_calendar_events(n, calendar_id=request.args.get('calendar_id', 'primary'), page_token=request.args.get('page_token'), sync_token=request.args.get('sync_token'))
   return jsonify({'events': events, 'page_token': page_token, 'sync_token': sync_token})
 
 @app.route('/events/create', methods=['POST'])

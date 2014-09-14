@@ -80,10 +80,15 @@ class User():
       self.set('timezone', default_calendar['timeZone'])
     return timezone
 
-  def get_calendar_events(self, n, page_token=None, sync_token=None):
+  def get_calendars(self):
+    calendar_service = self.build('calendar', v='v3')
+    calendar_list = calendar_service.calendarList().list().execute()
+    return calendar_list['items']
+
+  def get_calendar_events(self, n, calendar_id='primary', page_token=None, sync_token=None):
     calendar_service = self.build('calendar', v='v3')
     now = datetime.datetime.utcnow().isoformat("T") + "Z"
-    events = calendar_service.events().list(calendarId='primary', orderBy='startTime', maxResults=n, pageToken=page_token, syncToken=sync_token, singleEvents=True, timeMin=now).execute()
+    events = calendar_service.events().list(calendarId=calendar_id, orderBy='startTime', maxResults=n, pageToken=page_token, syncToken=sync_token, singleEvents=True, timeMin=now).execute()
     return events['items'], events.get('nextPageToken'), events.get('nextSyncToken')
 
   def insert_calendar_event(self, event):
