@@ -49,7 +49,7 @@ def user_calendar_events_view(pin, n):
 @app.route('/events/create', methods=['POST'])
 def events_create_view():
   event_ids = request.json['event_ids']
-  field_excludes = ['_id', 'email_id', 'title', 'user_id', 'datetime', 'end', 'location', 'url', 'source']
+  field_excludes = ['_id', 'email_id', 'title', 'user_id', 'datetime', 'end', 'location', 'url', 'source', 'latitude', 'longitude']
   processed_event_ids = []
   events = []
   for event_id in event_ids:
@@ -72,7 +72,9 @@ def events_create_view():
         'shared': event_obj_filtered
       }
     }
-    if event_obj.get('location'):
+    if event_obj.get('latitude') and event_obj.get('longitude'):
+      event['location'] = event_obj.get('latitude') + "," + event_obj.get('longitude')
+    elif event_obj.get('location'):
       event['location'] = event_obj.get('location')
     if event_obj.get('source') or event_obj.get('url'):
       event['source'] = {}
