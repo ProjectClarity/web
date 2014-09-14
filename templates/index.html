@@ -17,10 +17,13 @@
     {% raw %}
     <div class='col-md-4'>
       <div class="list-group" ng-repeat='event in events'>
-        <a href="#" class="list-group-item active">
+        <a href="#" ng-click="toggle($index)" class="list-group-item active">
           <h4 class="list-group-item-heading">{{event.title}}</h4>
           <p class="list-group-item-text">
             {{formatTime(event.datetime[0])}}
+          </p>
+          <p class="list-group-item-text">
+            {{event.location}}
           </p>
         </a>
       </div>
