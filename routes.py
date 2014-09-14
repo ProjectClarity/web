@@ -82,7 +82,7 @@ def events_create_view():
       event['source']['url'] = event_obj.get('url', url_for('index_view', _external=True))
     processed_event_ids.append(user.insert_calendar_event(event))
     events.append(event)
-    processed_data.remove({'_id': event_obj['_id']})
+    # processed_data.remove({'_id': event_obj['_id']})
   return jsonify({'status': 'ok', 'ids': processed_event_ids, 'events': events})
 
 @app.route('/user/distance')
@@ -92,7 +92,7 @@ def user_distance_view():
 
   origin = request.args.get('current_location')
   distances = {}
-  destinations = request.args.get('destinations').split('|')
+  destinations = request.args.get('destinations').split(';')
   for destination in destinations:
     distances[destination] = {}
     headers = {'Authorization': 'Token ' + os.getenv('UBER_API_KEY')}
@@ -103,19 +103,19 @@ def user_distance_view():
       'end_longitude': destination.split(',')[1],
     }
     price_resp = requests.get(UBER_API_ROOT + '/estimates/price', params=query, headers=headers).json()
-    for price in price_resp.get('prices',[]):
+    for price in price_resp.get('prices', []):
       if price['display_name'] == 'uberX':
         distances[destination]['uber_price'] = price['estimate']
         break
     time_resp = requests.get(UBER_API_ROOT + '/estimates/time', params=query, headers=headers).json()
-    for time in time_resp.get('times',[]):
+    for time in time_resp.get('times', []):
       if time['display_name'] == 'uberX':
         distances[destination]['uber_time'] = time['estimate']
         break
 
   parameters = {
-    'origins': request.args.get('current_location'),
-    'destinations': request.args.get('destinations'),
+    'origins': origin,
+    'destinations': '|'.join(destinations),
     'key': os.getenv('GOOGLE_API_KEY')
   }
   for mode in ['driving', 'biking', 'walking']:
