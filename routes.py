@@ -8,7 +8,9 @@ import requests
 @app.route('/')
 @login_required
 def index_view():
-  return render_template('index.html')
+  events = processed_data.find({'user_id': current_user.get('_id')})
+  events = [{k:str(v) if k.endswith('_id') else v for k,v in event.iteritems()} for event in events]
+  return render_template('index.html', events=events)
 
 @app.route('/auth/go')
 def login_signup_view():
@@ -48,12 +50,12 @@ def user_calendar_events_view(pin, n):
 
 @app.route('/user/<int:pin>/calendar/events/<event_id>/destroy', methods=['POST'])
 def event_destroy_view(pin, event_id):
-  def user_calendars_view(pin):
-    user = User.from_token(pin)
-    if not user:
-      return jsonify({'error': True, 'message': 'User not found'})
-    user.destroy_calendar_event(event_id, calendar_id=request.args.get('calendar_id', 'primary'))
-    return jsonify({'status': 'ok'})
+  user = User.from_token(pin)
+  if not user:
+    return jsonify({'error': True, 'message': 'User not found'})
+  user.destroy_calendar_event(event_id, calendar_id=request.args.get('calendar_id', 'primary'))
+  processed_data.find({'user_id': current_user.get('_id')})
+  return jsonify({'status': 'ok'})
 
 @app.route('/events/create', methods=['POST'])
 def events_create_view():
@@ -89,9 +91,10 @@ def events_create_view():
       event['source'] = {}
       event['source']['title'] = event_obj.get('source', event_obj['title'])
       event['source']['url'] = event_obj.get('url', url_for('index_view', _external=True))
-    processed_event_ids.append(user.insert_calendar_event(event))
+    event_id = user.insert_calendar_event(event)
+    processed_event_ids.append(event_id)
     events.append(event)
-    # processed_data.remove({'_id': event_obj['_id']})
+    processed_data.update({'_id': event_obj['_id']}, {'$set': {'event_id': event_id}})
   return jsonify({'status': 'ok', 'ids': processed_event_ids, 'events': events})
 
 @app.route('/user/distance')
