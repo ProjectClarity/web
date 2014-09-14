@@ -3,6 +3,7 @@ from imports import *
 from user import User
 from helpers import get_flow, humanize
 from remote import processed_data
+import requests
 
 @app.route('/')
 @login_required
@@ -79,5 +80,23 @@ def events_create_view():
       event['source']['url'] = event_obj.get('url', url_for('index_view', _external=True))
     processed_event_ids.append(user.insert_calendar_event(event))
     events.append(event)
-    # processed_data.remove({'_id': event_obj['_id']})
+    processed_data.remove({'_id': event_obj['_id']})
   return jsonify({'status': 'ok', 'ids': processed_event_ids, 'events': events})
+
+@app.route('/user/distance')
+def user_distance_view():
+  API_ROOT = 'https://maps.googleapis.com/maps/api/distancematrix/json'
+  parameters = {
+    'origins': request.args.get('current_location'),
+    'destinations': request.args.get('destinations'),
+    'key': os.getenv('GOOGLE_API_KEY')
+  }
+  distances = {}
+  destinations = request.args.get('destinations').split('|')
+  for mode in ['driving', 'biking', 'walking']:
+    parameters.update({'mode': mode})
+    resp = requests.get(API_ROOT, params=parameters).json()
+    for i,destination in enumerate(resp['rows'][0]['elements']):
+      distances[destinations[i]][mode] = destination['duration']['text']
+  return jsonify(distances)
+
