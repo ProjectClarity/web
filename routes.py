@@ -100,7 +100,7 @@ def events_create_view():
     user.tag_message(event_obj['email_id'], [os.getenv('TAG_NAME')])
     processed_event_ids.append(event_id)
     events.append(event)
-    processed_data.update({'_id': event_obj['_id']}, {'$set': {'event_id': event_id}})
+    processed_data.update({'_id': event_obj['_id']}, {'$set': {'event_id': event_id}, '$unset': {'original_body': True}})
   return jsonify({'status': 'ok', 'ids': processed_event_ids, 'events': events})
 
 @app.route('/user/distance')
