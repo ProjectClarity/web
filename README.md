@@ -1,7 +1,8 @@
 # Clarity
-### An Inbox For Your Events
 
 ![Clarity](http://s3.amazonaws.com/challengepost/photos/production/software_photos/000/158/451/datas/xlarge.png?1410702049)
+
+### An Inbox For Your Events
 
 Clarity is a mobile app and background service that takes all the work out of managing events you're invited to.
 
