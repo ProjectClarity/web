@@ -1,4 +1,4 @@
-var indexCtrl = PennAppsXMIT.controller('indexCtrl', ['$window', '$scope', '$sce', '$timeout',
+var indexCtrl = PennAppsXMIT.mtroller('indexCtrl', ['$window', '$scope', '$sce', '$timeout',
   function($window, $scope, $sce, $timeout) {
     $scope.events = $window.events;
     $scope.current = 0;
