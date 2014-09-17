@@ -30,6 +30,8 @@ def login_signup_callback_view():
   u = User(user_info['email'])
   if not u.check():
     u.create(credentials=credentials_object, **user_info)
+  if u.get('disabled', False):
+    u.update({'disabled': False, 'credentials': credentials_object})
   login_user(u, remember=True)
   return redirect(url_for('index_view'))
 
