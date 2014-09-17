@@ -45,7 +45,7 @@ def user_calendar_events_view(pin, n):
   user = User.from_token(pin)
   if not user:
     return jsonify({'error': True, 'message': 'User not found'})
-  events, page_token, sync_token = user.get_calendar_events(n, calendar_id=request.args.get('calendar_id', 'primary'), page_token=request.args.get('page_token'), sync_token=request.args.get('sync_token'))
+  events, page_token, sync_token = user.get_calendar_events(n, calendar_id=request.args.get('calendar_id', user.get_clarity_calendar()), page_token=request.args.get('page_token'), sync_token=request.args.get('sync_token'))
   return jsonify({'events': events, 'page_token': page_token, 'sync_token': sync_token})
 
 @app.route('/user/<int:pin>/calendar/events/<event_id>/destroy', methods=['POST'])
@@ -54,7 +54,7 @@ def event_destroy_view(pin, event_id):
   if not user:
     return jsonify({'error': True, 'message': 'User not found'})
   try:
-    user.destroy_calendar_event(event_id, calendar_id=request.args.get('calendar_id', 'primary'))
+    user.destroy_calendar_event(event_id, calendar_id=request.args.get('calendar_id', user.get_clarity_calendar()))
     processed_data.remove({'event_id': event_id})
   except:
     pass
@@ -96,7 +96,7 @@ def events_create_view():
       event['source'] = {}
       event['source']['title'] = event_obj.get('source', event_obj['title'])
       event['source']['url'] = event_obj.get('url', url_for('index_view', _external=True))
-    event_id = user.insert_calendar_event(event)
+    event_id = user.insert_calendar_event(event, calendar_id=user.get_clarity_calendar())
     user.tag_message(event_obj['email_id'], [os.getenv('TAG_NAME')])
     processed_event_ids.append(event_id)
     events.append(event)

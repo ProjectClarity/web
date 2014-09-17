@@ -85,13 +85,22 @@ class User():
     calendar_list = calendar_service.calendarList().list().execute()
     return calendar_list['items']
 
+  def get_clarity_calendar(self):
+    calendar_id = self.get('calendar_id')
+    if not calendar_id:
+      calendar_service = self.build('calendar', v='v3')
+      calendar = {'summary': 'Project Clarity'}
+      calendar_id = calendar_service.calendars().insert(body=calendar).execute()['id']
+      self.set('calendar_id', calendar_id)
+    return calendar_id
+
   def get_calendar_events(self, n, calendar_id='primary', page_token=None, sync_token=None):
     calendar_service = self.build('calendar', v='v3')
     now = datetime.datetime.utcnow().isoformat("T") + "Z"
     events = calendar_service.events().list(calendarId=calendar_id, orderBy='startTime', maxResults=n, pageToken=page_token, syncToken=sync_token, singleEvents=True, timeMin=now).execute()
     return events['items'], events.get('nextPageToken'), events.get('nextSyncToken')
 
-  def insert_calendar_event(self, event):
+  def insert_calendar_event(self, event, calendar_id='primary'):
     calendar_service = self.build('calendar', v='v3')
     return calendar_service.events().insert(calendarId='primary', body=event).execute()['id']
 
