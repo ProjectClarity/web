@@ -21,8 +21,8 @@ class User():
       return None
     return User(u.get('email'))
 
-  def get(self, key):
-    return self.user.get(key, '')
+  def get(self, key, default=''):
+    return self.user.get(key, default)
 
   def set(self, key, value):
     self.update({key: value})
