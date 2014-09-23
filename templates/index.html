@@ -32,7 +32,7 @@
         <a href="#" ng-click="toggle($index)" class="list-group-item" ng-class="{'active': current == $index}">
           <h4 class="list-group-item-heading">{{event.title}}</h4>
           <p class="list-group-item-text">
-            {{formatTime(event.datetime[0])}}
+            {{formatTime(event.datetime)}}
           </p>
           <p class="list-group-item-text">
             {{event.location}}
