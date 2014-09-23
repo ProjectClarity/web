@@ -28,6 +28,9 @@ var indexCtrl = PennAppsXMIT.controller('indexCtrl', ['$window', '$scope', '$sce
     navigator.geolocation.getCurrentPosition(loadDistances);
 
     $scope.formatTime = function(dt) {
+      if (dt instanceof Array) {
+        return moment(dt[0]).format('llll');
+      }
       return moment(dt).format('llll');
     };
     $scope.toggle = function(i) {

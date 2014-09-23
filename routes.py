@@ -3,12 +3,12 @@ from imports import *
 from user import User
 from helpers import get_flow, humanize
 from remote import processed_data
-import requests
+import requests, pymongo
 
 @app.route('/')
 @login_required
 def index_view():
-  events = processed_data.find({'user_id': current_user.get('_id'), 'datetime': {'$gt': datetime.datetime.utcnow()}}).limit(5)
+  events = processed_data.find({'user_id': current_user.get('_id'), 'datetime': {'$gt': datetime.datetime.utcnow()}}).sort('datetime', pymongo.ASCENDING).limit(5)
   events = [{k:str(v) if k.endswith('_id') else v for k,v in event.iteritems()} for event in events]
   return render_template('index.html', events=events)
 
