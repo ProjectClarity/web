@@ -55,12 +55,12 @@ def event_destroy_view(pin, event_id):
   user = User.from_token(pin)
   if not user:
     return jsonify({'error': True, 'message': 'User not found'})
+  processed_data.remove({'event_id': event_id})
   try:
     user.destroy_calendar_event(event_id, calendar_id=request.args.get('calendar_id', user.get_clarity_calendar()))
-    processed_data.remove({'event_id': event_id})
+    return jsonify({'status': 'ok'})
   except:
-    pass
-  return jsonify({'status': 'ok'})
+    return jsonify({'status': 'not found'})
 
 @app.route('/events/create', methods=['POST'])
 def events_create_view():
